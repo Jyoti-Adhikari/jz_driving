@@ -22,28 +22,30 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string" },
-                  "email": { "type": "string" },
-                  "phone": { "type": "string" },
-                  "password": { "type": "string" },
+                  "name": { "type": "string", "minLength": 2, "maxLength": 50 },
+                  "email": { "type": "string", "format": "email" },
+                  "phone": { "type": "string", "pattern": "^[0-9]{10}$" },
+                  "password": { "type": "string", "minLength": 6 },
                   "role": { "type": "string", "enum": ["customer", "instructor", "admin"] },
                   "address": {
                     "type": "object",
                     "properties": {
                       "city": { "type": "string" },
                       "country": { "type": "string" }
-                    }
+                    },
+                    "required": ["city", "country"]
                   },
                   "profile": {
                     "type": "object",
                     "properties": {
-                      "experience": { "type": "number" },
+                      "experience": { "type": "number", "minimum": 0 },
                       "specialization": { "type": "string" },
                       "availability": { "type": "array", "items": { "type": "string" } }
                     }
                   }
                 },
-                "required": ["name", "email", "phone", "password", "role"]
+                "required": ["name", "email", "phone", "password", "role", "address"],
+                "description": "profile is required if role is 'instructor'"
               }
             }
           }
@@ -67,7 +69,7 @@
             }
           },
           "400": {
-            "description": "Invalid data or user exists"
+            "description": "Invalid input data (e.g., 'Phone number must be 10 digits')"
           }
         }
       }
@@ -82,8 +84,8 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "email": { "type": "string" },
-                  "password": { "type": "string" }
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "minLength": 6 }
                 },
                 "required": ["email", "password"]
               }
@@ -110,6 +112,9 @@
           },
           "401": {
             "description": "Invalid credentials"
+          },
+          "400": {
+            "description": "Invalid input data (e.g., 'Invalid email format')"
           }
         }
       }
@@ -125,10 +130,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": { "type": "string" },
-                  "description": { "type": "string" },
-                  "durationHours": { "type": "number" },
-                  "price": { "type": "number" },
+                  "title": { "type": "string", "minLength": 2, "maxLength": 100 },
+                  "description": { "type": "string", "maxLength": 500 },
+                  "durationHours": { "type": "number", "minimum": 1 },
+                  "price": { "type": "number", "minimum": 0 },
                   "instructorId": { "type": "string" }
                 },
                 "required": ["title", "description", "durationHours", "price", "instructorId"]
@@ -156,7 +161,7 @@
             }
           },
           "400": {
-            "description": "Invalid course data"
+            "description": "Invalid input data (e.g., 'Title must be 2-100 characters')"
           }
         }
       },
@@ -211,13 +216,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": { "type": "string" },
-                  "description": { "type": "string" },
-                  "durationHours": { "type": "number" },
-                  "price": { "type": "number" },
+                  "title": { "type": "string", "minLength": 2, "maxLength": 100 },
+                  "description": { "type": "string", "maxLength": 500 },
+                  "durationHours": { "type": "number", "minimum": 1 },
+                  "price": { "type": "number", "minimum": 0 },
                   "instructorId": { "type": "string" },
                   "status": { "type": "string", "enum": ["active", "inactive", "draft"] }
-                }
+                },
+                "minProperties": 1
               }
             }
           }
@@ -244,6 +250,9 @@
           },
           "404": {
             "description": "Course not found"
+          },
+          "400": {
+            "description": "Invalid input data or no fields provided"
           }
         }
       },
@@ -296,7 +305,8 @@
                     "properties": {
                       "date": { "type": "string", "format": "date" },
                       "timeSlot": { "type": "string" }
-                    }
+                    },
+                    "required": ["date", "timeSlot"]
                   }
                 },
                 "required": ["courseId", "instructorId", "schedule"]
@@ -331,7 +341,7 @@
             }
           },
           "400": {
-            "description": "Invalid booking data"
+            "description": "Invalid input data (e.g., 'Date is required')"
           }
         }
       },
@@ -400,7 +410,8 @@
                 "type": "object",
                 "properties": {
                   "status": { "type": "string", "enum": ["pending", "confirmed", "completed", "cancelled"] }
-                }
+                },
+                "required": ["status"]
               }
             }
           }
@@ -422,6 +433,9 @@
           },
           "404": {
             "description": "Booking not found"
+          },
+          "400": {
+            "description": "Invalid input data (e.g., 'Invalid status value')"
           }
         }
       }
@@ -471,7 +485,7 @@
                 "type": "object",
                 "properties": {
                   "bookingId": { "type": "string" },
-                  "amount": { "type": "number" },
+                  "amount": { "type": "number", "minimum": 0 },
                   "method": { "type": "string", "enum": ["stripe", "cash", "esewa"] },
                   "transactionId": { "type": "string" }
                 },
@@ -501,7 +515,7 @@
             }
           },
           "400": {
-            "description": "Invalid payment data"
+            "description": "Invalid input data (e.g., 'Amount must be non-negative')"
           }
         }
       }
@@ -557,8 +571,8 @@
                 "properties": {
                   "instructorId": { "type": "string" },
                   "courseId": { "type": "string" },
-                  "rating": { "type": "number" },
-                  "comment": { "type": "string" }
+                  "rating": { "type": "number", "minimum": 1, "maximum": 5 },
+                  "comment": { "type": "string", "maxLength": 500 }
                 },
                 "required": ["instructorId", "courseId", "rating"]
               }
@@ -585,7 +599,7 @@
             }
           },
           "400": {
-            "description": "Invalid review data"
+            "description": "Invalid input data (e.g., 'Rating must be between 1 and 5')"
           }
         }
       }
@@ -639,7 +653,7 @@
                 "type": "object",
                 "properties": {
                   "type": { "type": "string", "enum": ["citizenship", "license", "passport"] },
-                  "fileUrl": { "type": "string" }
+                  "fileUrl": { "type": "string", "format": "uri" }
                 },
                 "required": ["type", "fileUrl"]
               }
@@ -665,7 +679,7 @@
             }
           },
           "400": {
-            "description": "Invalid document data"
+            "description": "Invalid input data (e.g., 'Type must be one of citizenship, license, passport')"
           }
         }
       }
@@ -689,7 +703,8 @@
                 "type": "object",
                 "properties": {
                   "status": { "type": "string", "enum": ["pending", "approved", "rejected"] }
-                }
+                },
+                "required": ["status"]
               }
             }
           }
@@ -712,6 +727,9 @@
           },
           "404": {
             "description": "Document not found"
+          },
+          "400": {
+            "description": "Invalid input data (e.g., 'Status must be one of pending, approved, rejected')"
           }
         }
       }

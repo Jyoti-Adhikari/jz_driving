@@ -1,14 +1,13 @@
 const Booking = require('../models/bookingModel');
 const sendNotification = require('../utils/sendNotification');
+const { bookingSchema, updateBookingStatusSchema } = require('../validators/bookingValidator');
 
 const createBooking = async (req, res) => {
   try {
-    const { courseId, instructorId, schedule } = req.body;
+    const { error } = bookingSchema.validate(req.body);
+    if (error) return res.status(400).json({ message: error.details[0].message });
 
-    // Basic validation
-    if (!courseId || !instructorId || !schedule || !schedule.date || !schedule.timeSlot) {
-      return res.status(400).json({ message: 'Missing required fields (courseId, instructorId, schedule.date, schedule.timeSlot)' });
-    }
+    const { courseId, instructorId, schedule } = req.body;
 
     const booking = await Booking.create({
       userId: req.user._id,
@@ -39,14 +38,13 @@ const getBookings = async (req, res) => {
 
 const updateBookingStatus = async (req, res) => {
   try {
+    const { error } = updateBookingStatusSchema.validate(req.body);
+    if (error) return res.status(400).json({ message: error.details[0].message });
+
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
-    }
-
-    if (!['pending', 'confirmed', 'completed', 'cancelled'].includes(req.body.status)) {
-      return res.status(400).json({ message: 'Invalid status value' });
     }
 
     booking.status = req.body.status || booking.status;
