@@ -13,11 +13,31 @@ const swaggerUi = require('swagger-ui-express');
 const fs = require('fs');
 const path = require('path');
 
+// Optional: Add Winston for logging
+const winston = require('winston');
+
 dotenv.config();
 connectDB();
 
 const app = express();
 app.use(express.json());
+
+// Optional: Configure Winston logger
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' }),
+    new winston.transports.Console()
+  ]
+});
+
+// Log server start
+logger.info('Server starting on port', { port: process.env.PORT || 5000 });
 
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
@@ -31,7 +51,11 @@ app.use('/api/notifications', notificationRoutes);
 const swaggerDocument = JSON.parse(fs.readFileSync(path.join(__dirname, 'docs/api-spec.json'), 'utf8'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.use(errorHandler);
+// Optional: Enhance error handling to log errors
+app.use((err, req, res, next) => {
+  logger.error('Unhandled error', { error: err.message, stack: err.stack, path: req.path });
+  errorHandler(err, req, res, next);
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
