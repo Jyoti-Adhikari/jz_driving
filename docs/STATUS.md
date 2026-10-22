@@ -1,9 +1,9 @@
 # Project Status — `jz_driving`
 
 ## Current Stage
-* **Active Step**: **Step 3 — Verification** (Completed)
-* **Backend Status**: **Fully Verified & Operational**
-* **Next Phase**: Website Frontend / Android Mobile App (Awaiting user instructions)
+* **Active Phase**: **Frontend Phase 1 — Foundation Setup** (Parts 1–3 Completed)
+* **Backend Status**: **Fully Verified & Operational** (Running on port 5000)
+* **Frontend Status**: **Architecture & Routing Active** (React 19 + Vite + react-router-dom)
 
 ---
 
@@ -12,7 +12,7 @@
 * **Backend**: Node.js (`v22.23.2`), Express 5 (`5.1.0`), Mongoose (`8.19.1`), Joi (`18.0.1`), JWT (`9.0.2`), bcryptjs (`3.0.2`), Winston (`3.18.3`), Swagger UI (`5.0.1`).
 * **Active Security & Utility Packages**: `cors`, `helmet`, `express-rate-limit`, `multer`.
 * **Database**: MongoDB connected and operational.
-* **Frontend**: React 19 + Vite (on hold until next phase).
+* **Frontend**: React 19 (`^19.1.1`), `react-router-dom` (`^7.18.4`), `lucide-react` (`^1.61.0`), Vanilla CSS design system.
 * **Mobile App**: To be bootstrapped in subsequent phase.
 
 ---
@@ -63,6 +63,11 @@
 - [x] Verify `/api-docs` Swagger UI endpoint.
 - [x] Execute targeted curl API tests covering auth, roles, authorization gaps, and errors.
 - [x] Audit npm vulnerabilities using `npm audit` without applying destructive automatic fixes.
+
+### Frontend Phase 1: Foundation Setup (Completed)
+- [x] Part 1: Install core dependencies (`react-router-dom`, `lucide-react`) and verify Vite/Rolldown build.
+- [x] Part 2: Configure environment (`.env`), native fetch API client (`services/api.js`), and session `AuthContext.jsx`.
+- [x] Part 3: Implement Vanilla CSS design system, responsive `Navbar`, `Footer`, `Layout`, role-based route guards (`ProtectedRoute`, `PublicOnlyRoute`), and `App.jsx` routing skeleton with clean placeholders.
 
 ---
 
