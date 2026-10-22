@@ -51,6 +51,29 @@ export function AuthProvider({ children }) {
   };
 
   /**
+   * Register new user against backend POST /api/auth/register
+   * Backend returns { _id, name, email, role, token }
+   */
+  const register = async (registrationData) => {
+    const data = await api.post('/auth/register', registrationData);
+
+    if (!data || !data.token) {
+      throw new ApiError('Invalid response from registration server', 500, data);
+    }
+
+    const { token: receivedToken, ...userData } = data;
+
+    // Persist session tokens and user metadata (passwords are never saved or retained)
+    localStorage.setItem('token', receivedToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+
+    setToken(receivedToken);
+    setUser(userData);
+
+    return userData;
+  };
+
+  /**
    * Clear session and reset auth state
    */
   const logout = () => {
@@ -77,6 +100,7 @@ export function AuthProvider({ children }) {
     loading,
     isAuthenticated: !!token && !!user,
     login,
+    register,
     logout,
     updateUser,
   };

@@ -1,9 +1,9 @@
 # Project Status — `jz_driving`
 
 ## Current Stage
-* **Active Phase**: **Frontend Phase 1 — Foundation Setup** (Parts 1–3 Completed)
+* **Active Phase**: **Frontend Phase 2 — Core Features** (Part 4: Role-Based Dashboards Completed)
 * **Backend Status**: **Fully Verified & Operational** (Running on port 5000)
-* **Frontend Status**: **Architecture & Routing Active** (React 19 + Vite + react-router-dom)
+* **Frontend Status**: **Authentication & Routing Operational** (React 19 + Vite + react-router-dom)
 
 ---
 
@@ -68,6 +68,47 @@
 - [x] Part 1: Install core dependencies (`react-router-dom`, `lucide-react`) and verify Vite/Rolldown build.
 - [x] Part 2: Configure environment (`.env`), native fetch API client (`services/api.js`), and session `AuthContext.jsx`.
 - [x] Part 3: Implement Vanilla CSS design system, responsive `Navbar`, `Footer`, `Layout`, role-based route guards (`ProtectedRoute`, `PublicOnlyRoute`), and `App.jsx` routing skeleton with clean placeholders.
+
+### Frontend Phase 2: Core Feature Implementation
+- [x] **Part 1: Functional Login & Registration (Completed)**
+  - Connected `/login` to `POST /api/auth/login`: client validation, disabled state during submission, backend error alerts, and destination/role redirect.
+  - Connected `/register` to `POST /api/auth/register`: student/instructor role selection, conditional instructor fields (experience, specialization, availability), 10-digit phone enforcement, password match checks, and pending instructor approval notice.
+  - Form design system: responsive accessible forms, keyboard accessibility (`aria-invalid`, `aria-describedby`), loading spinners.
+  - Security: passwords never stored in local storage or state past submission, token persistence, zero backend modifications.
+- [x] **Part 2: Real Course Catalog (Completed)**
+  - Connected `/courses` to `GET /api/courses` via native API client (`services/api.js`).
+  - Displays real course cards showing title, description, duration in hours, price in NPR, assigned instructor name and email, and status badge (`active`, `inactive`, `draft`).
+  - Implemented loading state with animated spinner, error state with alert banner and retry button, empty catalog state with reload action, and filtered empty state with reset filter action.
+  - Added responsive toolbar with client-side text search (by title, description, instructor) and status dropdown filtering.
+  - Publicly accessible without login; booking preserved for Part 3; zero backend modifications.
+- [x] **Part 3: Course Booking Flow & Scheduling (Completed)**
+  - Connected course cards to `POST /api/bookings` via `services/api.js`.
+  - Added "Book Course" action button to active courses for customer and guest users; instructors and admins receive informative read-only role badges.
+  - Implemented unauthenticated redirection flow to `/login` preserving intended destination and selected course ID (`location.state.bookingCourseId`), automatically reopening the booking modal post-authentication.
+  - Implemented accessible modal dialog (`role="dialog"`, `aria-modal="true"`, Escape key dismissal, backdrop dismiss).
+  - Included course summary, calendar date selector with `min` set to today's date, time slot selection, duplicate submission prevention (`isSubmittingBooking`), and real-time backend error handling.
+  - Implemented confirmed booking success view with booking details, pending approval badge, and direct navigation to `/dashboard`.
+  - Kept instructor and admin permissions unchanged; zero backend modifications.
+- [x] **Part 4: Role-Based Dashboards (Customer, Instructor, Admin) (Completed)**
+  - **Customer Dashboard (`/dashboard`)**:
+    - Connected to `GET /api/bookings` and `GET /api/notifications` via native API client.
+    - Displays customer bookings with course title, assigned instructor, date, time slot, booking status, and payment status.
+    - Implemented cancel booking action calling `PUT /api/bookings/:id/cancel` with confirmation and loading spinner.
+    - Included stats row (Total Bookings, Active Lessons, Completed, Unread Alerts), recent notifications, quick action navigation, loading spinner, error alert with retry button, and empty state.
+  - **Instructor Dashboard (`/instructor/dashboard`)**:
+    - Connected to `GET /api/bookings` (filtered automatically by backend to assigned instructor).
+    - Shows assigned lessons with student details (name, email), date, time slot, and booking status badge.
+    - Implemented inline booking status updates calling `PUT /api/bookings/:id/status` (`pending`, `confirmed`, `completed`, `cancelled`) with per-lesson loading state and success/error feedback.
+    - Included instructor stats row (Total Lessons, Active, Completed, Students count), loading spinner, error alert with retry button, and empty state.
+  - **Admin Dashboard (`/admin/dashboard`)**:
+    - Connected to `GET /api/bookings` (returns all bookings system-wide) and `GET /api/courses`.
+    - Features tabbed navigation: Overview, All Bookings, Courses, Instructor Approvals, Document Reviews.
+    - System overview with metrics, booking breakdown visual bars, and quick action cards.
+    - Full booking management with status filtering (`all`, `pending`, `confirmed`, `completed`, `cancelled`) and inline status update via `PUT /api/bookings/:id/status`.
+    - Instructor approvals via `PUT /api/auth/approve-instructor/:id` with ID input, loading spinner, validation, success feedback, and convenient helper list of known instructors from active records.
+    - Document review via `PUT /api/documents/:id/review` with ID input, status selection (`approved` / `rejected`), loading spinner, and success feedback.
+    - Transparent in-UI documentation of backend capabilities (noting that `GET /api/users` and `GET /api/documents` listing endpoints are not provided by the backend).
+    - Verified with `npm run lint` and `npm run build` with zero errors.
 
 ---
 
