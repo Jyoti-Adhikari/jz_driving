@@ -27,6 +27,14 @@ const userSchema = new mongoose.Schema({
   timestamps: true, // Handles createdAt and updatedAt automatically
 });
 
+// Automatically strip password from JSON responses
+userSchema.set('toJSON', {
+  transform: (doc, ret) => {
+    delete ret.password;
+    return ret;
+  },
+});
+
 // Optional: Add pre-save middleware to update timestamps
 userSchema.pre('save', function(next) {
   this.updatedAt = Date.now();

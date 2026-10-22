@@ -1,12 +1,19 @@
 const Payment = require('../models/paymentModel');
+const Booking = require('../models/bookingModel');
 const { paymentSchema } = require('../validators/paymentValidator');
 
+// TODO: Integrate actual eSewa / Khalti / Stripe payment gateway API & webhook verification
 const processPayment = async (req, res) => {
   try {
     const { error } = paymentSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.details[0].message });
 
     const { bookingId, amount, method, transactionId } = req.body;
+
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
 
     const payment = await Payment.create({
       userId: req.user._id,
@@ -16,6 +23,10 @@ const processPayment = async (req, res) => {
       transactionId,
       status: 'paid',
     });
+
+    // Update associated booking payment status
+    booking.paymentStatus = 'paid';
+    await booking.save();
 
     res.status(201).json(payment);
   } catch (error) {

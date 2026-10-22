@@ -1,12 +1,21 @@
 const express = require('express');
-const { registerUser, loginUser, updateProfile } = require('../controllers/authController');
+const rateLimit = require('express-rate-limit');
+const { registerUser, loginUser, updateProfile, approveInstructor } = require('../controllers/authController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.post('/register', registerUser);
-router.post('/login', loginUser);
-router.put('/profile', protect, updateProfile); // New route for updating user profile
-router.put('/approve-instructor/:id', protect, admin, (req, res) => res.send('Approve instructor')); // Placeholder
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { message: 'Too many authentication attempts, please try again after 15 minutes' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+router.post('/register', authLimiter, registerUser);
+router.post('/login', authLimiter, loginUser);
+router.put('/profile', protect, updateProfile);
+router.put('/approve-instructor/:id', protect, admin, approveInstructor);
 
 module.exports = router;

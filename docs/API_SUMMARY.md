@@ -94,6 +94,10 @@ Base URL (local development): `http://localhost:5000/api`
   ```json
   { "message": "Admin access required" }
   ```
+* **Rate Limit Error (`429 Too Many Requests`)**:
+  ```json
+  { "message": "Too many authentication attempts, please try again after 15 minutes" }
+  ```
 * **Server Error (`500 Internal Server Error`)**:
   ```json
   { "message": "<Error message>", "stack": "<Stack trace only if NODE_ENV=development>" }

@@ -95,4 +95,33 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, updateProfile };
+const mongoose = require('mongoose');
+
+const approveInstructor = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid instructor ID' });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Instructor not found' });
+    }
+
+    if (user.role !== 'instructor') {
+      return res.status(400).json({ message: 'User is not an instructor' });
+    }
+
+    user.isApproved = true;
+    await user.save();
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    res.json(userObj);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, updateProfile, approveInstructor };

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Document = require('../models/documentModel');
 const { documentSchema, reviewDocumentSchema } = require('../validators/documentValidator');
 
@@ -6,7 +7,16 @@ const uploadDocument = async (req, res) => {
     const { error } = documentSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.details[0].message });
 
-    const { type, fileUrl } = req.body;
+    let fileUrl = req.body.fileUrl;
+    if (req.file) {
+      fileUrl = `/uploads/${req.file.filename}`;
+    }
+
+    if (!fileUrl) {
+      return res.status(400).json({ message: 'Document file or fileUrl is required' });
+    }
+
+    const { type } = req.body;
 
     const document = await Document.create({
       userId: req.user._id,
@@ -22,6 +32,10 @@ const uploadDocument = async (req, res) => {
 
 const reviewDocument = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid document ID' });
+    }
+
     const { error } = reviewDocumentSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.details[0].message });
 

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Booking = require('../models/bookingModel');
 const sendNotification = require('../utils/sendNotification');
 const { bookingSchema, updateBookingStatusSchema } = require('../validators/bookingValidator');
@@ -27,9 +28,13 @@ const createBooking = async (req, res) => {
 
 const getBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ userId: req.user._id })
+    const query = req.user.role === 'admin' 
+      ? {} 
+      : (req.user.role === 'instructor' ? { instructorId: req.user._id } : { userId: req.user._id });
+    const bookings = await Booking.find(query)
       .populate('courseId', 'title')
-      .populate('instructorId', 'name email');
+      .populate('instructorId', 'name email')
+      .populate('userId', 'name email');
     res.json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -38,6 +43,10 @@ const getBookings = async (req, res) => {
 
 const updateBookingStatus = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid booking ID' });
+    }
+
     const { error } = updateBookingStatusSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.details[0].message });
 
@@ -45,6 +54,13 @@ const updateBookingStatus = async (req, res) => {
 
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    const isAssignedInstructor = booking.instructorId && booking.instructorId.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isAssignedInstructor && !isAdmin) {
+      return res.status(403).json({ message: 'Only assigned instructor or admin can update booking status' });
     }
 
     booking.status = req.body.status || booking.status;
@@ -61,10 +77,21 @@ const updateBookingStatus = async (req, res) => {
 
 const cancelBooking = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid booking ID' });
+    }
+
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    const isOwner = booking.userId && booking.userId.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'Only booking owner or admin can cancel booking' });
     }
 
     booking.status = 'cancelled';

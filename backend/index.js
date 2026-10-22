@@ -12,6 +12,8 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const swaggerUi = require('swagger-ui-express');
 const fs = require('fs');
 const path = require('path');
+const cors = require('cors');
+const helmet = require('helmet');
 
 // Optional: Add Winston for logging
 const winston = require('winston');
@@ -20,7 +22,25 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+// Security and CORS
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+}));
+const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+app.use(cors({
+  origin: clientUrl,
+  credentials: true,
+}));
+
 app.use(express.json());
+
+// Static serving for uploads
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadDir));
 
 // Optional: Configure Winston logger
 const logger = winston.createLogger({
