@@ -38,14 +38,6 @@ export function Courses() {
   const [bookingSuccess, setBookingSuccess] = useState(null);
 
 
-  // Booking Modal State
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [bookingDate, setBookingDate] = useState('');
-  const [bookingTimeSlot, setBookingTimeSlot] = useState('07:00 AM - 09:00 AM');
-  const [bookingError, setBookingError] = useState(null);
-  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState(null);
 
   const minDate = new Date().toISOString().split('T')[0];
 
@@ -386,10 +378,10 @@ export function Courses() {
                       <h2 className="course-title">{course.title}</h2>
                       <span
                         className={`badge ${isStatusActive
-                            ? 'badge-active'
-                            : statusKey === 'draft'
-                              ? 'badge-draft'
-                              : 'badge-inactive'
+                          ? 'badge-active'
+                          : statusKey === 'draft'
+                            ? 'badge-draft'
+                            : 'badge-inactive'
                           }`}
                         title={`Course status: ${statusKey}`}
                       >
