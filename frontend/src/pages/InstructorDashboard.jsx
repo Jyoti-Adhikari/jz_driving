@@ -15,13 +15,6 @@ const STATUS_STYLES = {
   cancelled: { background: 'var(--danger-50)', color: 'var(--danger-700)', border: '1px solid #fecdd3' },
 };
 
-const STATUS_STYLES = {
-  pending:   { background: 'var(--warning-50)', color: 'var(--warning-600)', border: '1px solid #fde68a' },
-  confirmed: { background: 'var(--primary-50)', color: 'var(--primary-600)', border: '1px solid var(--primary-200)' },
-  completed: { background: 'var(--success-50)', color: 'var(--success-700)', border: '1px solid #a7f3d0' },
-  cancelled: { background: 'var(--danger-50)', color: 'var(--danger-700)', border: '1px solid #fecdd3' },
-};
-
 function LessonCard({ booking, onStatusUpdate, updatingId }) {
   const [selectedStatus, setSelectedStatus] = useState(booking.status);
   const isUpdating = updatingId === booking._id;
