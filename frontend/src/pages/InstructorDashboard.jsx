@@ -255,3 +255,4 @@ export function InstructorDashboard() {
 }
 
 export default InstructorDashboard;
+export default InstructorDashboard;
