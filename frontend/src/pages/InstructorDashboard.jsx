@@ -255,6 +255,3 @@ export function InstructorDashboard() {
 }
 
 export default InstructorDashboard;
-
-
-hi
